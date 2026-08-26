@@ -14,6 +14,8 @@ import {
   Users,
 } from "lucide-react";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+
 function AnimatedBackground() {
   return (
     <div className="pointer-events-none fixed inset-0 overflow-hidden">
@@ -726,7 +728,7 @@ function AdminDashboard({ session, onBack, onLogout }) {
       const token = await getToken();
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/admin/activity`,
+        `${API_BASE_URL}/api/admin/activity`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -753,7 +755,7 @@ function AdminDashboard({ session, onBack, onLogout }) {
       const token = await getToken();
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/admin/users`,
+        `${API_BASE_URL}/api/admin/users`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -789,7 +791,7 @@ function AdminDashboard({ session, onBack, onLogout }) {
       const token = await getToken();
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/admin/users/${userId}`,
+        `${API_BASE_URL}/api/admin/users/${userId}`,
         {
           method: "DELETE",
           headers: {
