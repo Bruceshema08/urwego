@@ -17,7 +17,9 @@ if (!VITE_SUPABASE_URL) {
 }
 
 if (!VITE_SUPABASE_PUBLISHABLE_KEY) {
-  throw new Error("Missing VITE_SUPABASE_PUBLISHABLE_KEY in .env");
+  throw new Error(
+    "Missing VITE_SUPABASE_PUBLISHABLE_KEY in .env"
+  );
 }
 
 if (!SUPABASE_SECRET_KEY) {
