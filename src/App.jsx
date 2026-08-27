@@ -611,7 +611,57 @@ function Stat({ icon, title, value }) {
   );
 }
 
-function Documents() {
+function Documents({ user }) {
+  const [documents, setDocuments] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  async function loadDocuments() {
+    const { data, error } = await supabase.storage
+      .from("documents")
+      .list(user.id, { sortBy: { column: "created_at", order: "desc" } });
+
+    if (error) {
+      setErrorMessage(error.message);
+      return;
+    }
+
+    setDocuments(data || []);
+  }
+
+  useEffect(() => {
+    loadDocuments();
+  }, [user.id]);
+
+  async function uploadDocument(event) {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    setLoading(true);
+    setMessage("");
+    setErrorMessage("");
+
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const path = `${user.id}/${Date.now()}-${safeName}`;
+    const { error } = await supabase.storage
+      .from("documents")
+      .upload(path, file, { upsert: false });
+
+    if (error) {
+      setErrorMessage(error.message);
+    } else {
+      setMessage("Document uploaded successfully.");
+      await loadDocuments();
+    }
+
+    event.target.value = "";
+    setLoading(false);
+  }
+
   return (
     <>
       <FileText className="text-teal-300" size={36} />
@@ -622,10 +672,32 @@ function Documents() {
         Your academic documents will appear here.
       </p>
 
-      <button className="mt-8 inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 font-bold text-white transition hover:bg-teal-400">
+      <label className="mt-8 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 font-bold text-white transition hover:bg-teal-400">
         <Upload size={18} />
-        Upload document
-      </button>
+        {loading ? "Uploading..." : "Upload document"}
+        <input
+          type="file"
+          onChange={uploadDocument}
+          disabled={loading}
+          className="sr-only"
+        />
+      </label>
+
+      {message && <p className="mt-4 text-sm text-teal-300">{message}</p>}
+      {errorMessage && (
+        <p className="mt-4 text-sm text-red-300">{errorMessage}</p>
+      )}
+
+      <div className="mt-8 space-y-3">
+        {documents.map((document) => (
+          <div
+            key={document.id}
+            className="rounded-xl border border-white/10 bg-black/10 px-4 py-3 text-sm text-slate-300"
+          >
+            {document.name}
+          </div>
+        ))}
+      </div>
     </>
   );
 }
@@ -1043,7 +1115,7 @@ function AdminDashboard({ session, onBack, onLogout }) {
   );
 }
 
-function Dashboard({ user, session, onLogout, onAdmin }) {
+function Dashboard({ user, authUser, session, onLogout, onAdmin }) {
   const [page, setPage] = useState("dashboard");
 
   return (
@@ -1059,7 +1131,7 @@ function Dashboard({ user, session, onLogout, onAdmin }) {
         <section className="min-w-0 flex-1">
           <div className="min-h-[calc(100vh-40px)] rounded-3xl border border-white/10 bg-white/[0.06] p-6 shadow-2xl backdrop-blur-xl md:p-9">
             {page === "dashboard" && <DashboardHome user={user} />}
-            {page === "documents" && <Documents />}
+            {page === "documents" && <Documents user={authUser} />}
             {page === "chat" && <Chat />}
           </div>
         </section>
@@ -1142,6 +1214,7 @@ export default function App() {
         ) : (
           <Dashboard
             user={username}
+            authUser={user}
             session={session}
             onLogout={logout}
             onAdmin={() => setAdminMode(true)}
