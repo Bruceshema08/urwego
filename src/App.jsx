@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "./lib/supabase";
 import {
   BookOpen,
@@ -616,6 +616,7 @@ function Documents({ user }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const fileInputRef = useRef(null);
 
   async function loadDocuments() {
     const { data, error } = await supabase.storage
@@ -672,16 +673,22 @@ function Documents({ user }) {
         Your academic documents will appear here.
       </p>
 
-      <label className="mt-8 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 font-bold text-white transition hover:bg-teal-400">
+      <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        disabled={loading}
+        className="mt-8 inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 font-bold text-white transition hover:bg-teal-400 disabled:cursor-not-allowed disabled:opacity-60"
+      >
         <Upload size={18} />
         {loading ? "Uploading..." : "Upload document"}
-        <input
-          type="file"
-          onChange={uploadDocument}
-          disabled={loading}
-          className="sr-only"
-        />
-      </label>
+      </button>
+      <input
+        ref={fileInputRef}
+        type="file"
+        onChange={uploadDocument}
+        disabled={loading}
+        className="sr-only"
+      />
 
       {message && <p className="mt-4 text-sm text-teal-300">{message}</p>}
       {errorMessage && (
