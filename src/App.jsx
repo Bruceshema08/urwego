@@ -358,7 +358,7 @@ function Auth({
 
   return (
     <main className="relative z-10 flex min-h-screen items-center justify-center px-6 py-10">
-      <section className="w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.06] p-8 shadow-2xl backdrop-blur-xl">
+      <section className="auth-card w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.06] p-8 shadow-2xl backdrop-blur-xl">
         <Logo />
 
         <h1 className="mt-10 text-3xl font-black text-white">{title}</h1>
